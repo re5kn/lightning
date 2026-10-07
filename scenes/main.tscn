@@ -14,6 +14,8 @@ script = ExtResource("2_world")
 [node name="Camera" type="Camera3D" parent="World"]
 current = true
 
+[node name="Surfaces" type="MeshInstance3D" parent="World"]
+
 [node name="Lines" type="MeshInstance3D" parent="World"]
 
 [node name="HUDLayer" type="CanvasLayer" parent="."]

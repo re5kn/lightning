@@ -211,8 +211,8 @@ func _draw_title(t: float) -> void:
 	_draw_menu(items, W / 2.0, main.menu_y0())
 	if main.record > 0:
 		_text("record " + str(main.record), W / 2.0, 330, 20, Color("#8a8a90"), "center")
-	_text("keyboard:  LEFT / RIGHT  lane (hold to repeat)    X / UP  shift up    Z / DOWN  shift down    Enter  select    Esc  pause    M  sound", W / 2.0, H - 70, 16, Color("#8a8a90"), "center")
-	_text("gamepad:  D-pad / left stick  lane    A / RB  shift up    X / LB  shift down    Start  pause", W / 2.0, H - 42, 16, Color("#6a6a70"), "center")
+	_text("keyboard:  LEFT / RIGHT  lane (hold to repeat)    X / UP  shift up    Z / DOWN  shift down    Enter  select    Esc  pause    M  sound    V  view", W / 2.0, H - 70, 16, Color("#8a8a90"), "center")
+	_text("gamepad:  D-pad / left stick  lane    A / RB  shift up    X / LB  shift down    Start  pause    Back  view", W / 2.0, H - 42, 16, Color("#6a6a70"), "center")
 
 
 func _draw_result() -> void:

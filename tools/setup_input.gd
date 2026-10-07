@@ -31,6 +31,7 @@ func _init() -> void:
 		"shift_down": [_key(KEY_DOWN), _key(KEY_Z), _btn(JOY_BUTTON_X), _btn(JOY_BUTTON_LEFT_SHOULDER)],  # Wii リモコンの 1 ボタン
 		"pause": [_key(KEY_ESCAPE), _key(KEY_P), _btn(JOY_BUTTON_START)],
 		"sound_toggle": [_key(KEY_M)],
+		"view_toggle": [_key(KEY_V), _btn(JOY_BUTTON_BACK)],                                            # 見た目の切り替え
 		# メニュー
 		"menu_up": [_key(KEY_UP), _btn(JOY_BUTTON_DPAD_UP), _axis(JOY_AXIS_LEFT_Y, -1.0)],
 		"menu_down": [_key(KEY_DOWN), _btn(JOY_BUTTON_DPAD_DOWN), _axis(JOY_AXIS_LEFT_Y, 1.0)],
