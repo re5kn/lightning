@@ -1,9 +1,10 @@
 extends Node
 ## 画面の流れ (タイトル → プレイ → time up → リザルト) と入力。
 ## 入力はすべて InputMap のアクション (プロジェクト設定 > インプットマップ) で受ける。
-##   lane_left / lane_right / shift_up / shift_down / pause / sound_toggle / menu_up / menu_down / menu_accept
+##   lane_left / lane_right / shift_up / shift_down / pause / sound_toggle / view_toggle / menu_up / menu_down / menu_accept
 
 const P := preload("res://scripts/params.gd")
+const WV := preload("res://scripts/world_view.gd")
 const SAVE_PATH := "user://save.cfg"
 
 @onready var world: Node3D = $World
@@ -19,6 +20,7 @@ var state_t := 0.0
 var anim_t := 0.0
 var record := 0
 var total_dst := P.START_TOTAL_DST
+var view := "standard"      # 見た目 (world_view.gd の VIEWS)。タイトルの view で選ぶ。プレイ中も V / Back で切り替えられる
 var time_override := 0.0    # テスト用: 制限時間 (秒)。Web は URL の ?time=60、PC は -- --time=60
 
 
@@ -27,6 +29,7 @@ func _ready() -> void:
 	world.visible = false
 	_load()
 	_read_test_options()
+	world.set_view(view)
 
 
 func _process(delta: float) -> void:
@@ -68,6 +71,8 @@ func _play_input() -> void:
 		return
 	if Input.is_action_just_pressed(&"sound_toggle"):
 		snd.set_muted(not snd.is_muted())
+	if Input.is_action_just_pressed(&"view_toggle"):
+		_toggle_view()
 	if paused:
 		_menu_input()
 		return
@@ -96,6 +101,9 @@ func _menu_input() -> void:
 		_menu_ok()
 	elif Input.is_action_just_pressed(&"sound_toggle"):
 		snd.set_muted(not snd.is_muted())
+	elif Input.is_action_just_pressed(&"view_toggle") and state == "title":
+		_toggle_view()
+		snd.play(&"ok")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -111,7 +119,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func menu_items() -> Array:
 	if state == "title":
-		return ["start", "sound " + ("off" if snd.is_muted() else "on")]
+		return ["start", "view " + view, "sound " + ("off" if snd.is_muted() else "on")]
 	if paused:
 		return ["resume", "quit"]
 	return ["try again", "main menu"]
@@ -134,6 +142,9 @@ func _menu_ok() -> void:
 	if state == "title":
 		if menu_sel == 0:
 			_start_game()
+		elif menu_sel == 1:
+			_toggle_view()
+			snd.play(&"ok")
 		else:
 			snd.set_muted(not snd.is_muted())
 			snd.play(&"ok")
@@ -148,6 +159,14 @@ func _menu_ok() -> void:
 		else:
 			snd.play(&"ok")
 			_set_state("title")
+
+
+## 見た目を次のものへ切り替えて保存する
+func _toggle_view() -> void:
+	var vs: Array = WV.VIEWS
+	view = vs[(vs.find(view) + 1) % vs.size()]
+	world.set_view(view)
+	_save()
 
 
 # ---------- 画面の切り替え ----------
@@ -215,12 +234,16 @@ func _load() -> void:
 	if cf.load(SAVE_PATH) == OK:
 		record = cf.get_value("progress", "record", 0)
 		total_dst = cf.get_value("progress", "total_dst", P.START_TOTAL_DST)
+		view = cf.get_value("settings", "view", "standard")
+		if not WV.VIEWS.has(view):
+			view = "standard"
 
 
 func _save() -> void:
 	var cf := ConfigFile.new()
 	cf.set_value("progress", "record", record)
 	cf.set_value("progress", "total_dst", total_dst)
+	cf.set_value("settings", "view", view)
 	cf.save(SAVE_PATH)
 
 

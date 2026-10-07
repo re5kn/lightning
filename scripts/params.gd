@@ -1,6 +1,6 @@
 class_name Params
 ## 調整用パラメータ。HTML5 たたき台 (game/index.html) の P オブジェクトをそのまま移植した値。
-## 見た目は「standard」、線の速さは「standard」のみ (バリエーションは後で追加)。
+## 線の速さは「standard」のみ (バリエーションは後で追加)。見た目の種類は world_view.gd
 
 const LANES := 7                 # 車線数
 const LANE_W := 2.0              # 車線幅 (ワールド単位)
