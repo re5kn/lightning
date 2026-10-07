@@ -98,8 +98,8 @@ func _draw_play(t: float) -> void:
 		_text("time up", W / 2.0, H / 2.0, 84, Color.WHITE, "center", _light)
 	if main.paused:
 		draw_rect(Rect2(0, 0, W, H), Color(0, 0, 0, 0.55))
-		_text("pause", W / 2.0, H / 2.0 - 10.0, 64, Color.WHITE, "center", _light)
-		_text("Esc / P / Start: resume", W / 2.0, H / 2.0 + 50.0, 22, Color("#aaaaaa"), "center")
+		_text("pause", W / 2.0, H / 2.0 - 70.0, 64, Color.WHITE, "center", _light)
+		_draw_menu(main.menu_items(), W / 2.0, main.menu_y0())
 
 
 func _draw_hud(g: Race, t: float) -> void:

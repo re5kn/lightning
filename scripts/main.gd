@@ -39,6 +39,8 @@ func _process(delta: float) -> void:
 			menu_line += (1.0 - menu_line) * minf(1.0, dt * 8.0)
 		"play":
 			_play_input()
+			if paused:
+				menu_line += (1.0 - menu_line) * minf(1.0, dt * 8.0)
 			if not paused:
 				if race.update(dt):
 					_time_up()
@@ -62,11 +64,12 @@ func _notification(what: int) -> void:
 
 func _play_input() -> void:
 	if Input.is_action_just_pressed(&"pause"):
-		paused = not paused
-		snd.bgm_pause(paused)
+		_set_paused(not paused)
+		return
 	if Input.is_action_just_pressed(&"sound_toggle"):
 		snd.set_muted(not snd.is_muted())
 	if paused:
+		_menu_input()
 		return
 	var lh := Input.is_action_pressed(&"lane_left")
 	var rh := Input.is_action_pressed(&"lane_right")
@@ -97,7 +100,7 @@ func _menu_input() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# マウス / タッチでメニューを選ぶ
-	if (state == "title" or state == "result") and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if (state == "title" or state == "result" or paused) and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var y0 := menu_y0()
 		var i := roundi((event.position.y - y0) / 52.0)
 		var n := menu_items().size()
@@ -109,10 +112,14 @@ func _unhandled_input(event: InputEvent) -> void:
 func menu_items() -> Array:
 	if state == "title":
 		return ["start", "sound " + ("off" if snd.is_muted() else "on")]
+	if paused:
+		return ["resume", "quit"]
 	return ["try again", "main menu"]
 
 
 func menu_y0() -> float:
+	if paused:
+		return 390.0
 	return 400.0 if state == "title" else 560.0
 
 
@@ -130,6 +137,11 @@ func _menu_ok() -> void:
 		else:
 			snd.set_muted(not snd.is_muted())
 			snd.play(&"ok")
+	elif paused:
+		if menu_sel == 0:
+			_set_paused(false)
+		else:
+			_quit_race()
 	elif state == "result":
 		if menu_sel == 0:
 			_start_game()
@@ -159,15 +171,41 @@ func _start_game() -> void:
 	snd.bgm_start()
 
 
+## ポーズ画面を開く / 閉じる。開いたときは「resume」を選んだ状態から
+func _set_paused(p: bool) -> void:
+	paused = p
+	menu_sel = 0
+	menu_line = 0.0
+	race.release_all()
+	snd.bgm_pause(p)
+	snd.play(&"menu")
+
+
+## ポーズ画面で quit: そこまでのスコアと距離でリザルト画面へ (time up と同じく自己ベスト・累計距離に反映)
+func _quit_race() -> void:
+	paused = false
+	race.playing = false
+	race.score = floorf(race.score)
+	snd.bgm_pause(false)
+	snd.bgm_stop()
+	snd.play(&"ok")
+	_finish_race()
+	_set_state("result")
+
+
 func _time_up() -> void:
 	snd.bgm_stop()
 	snd.play(&"timeup")
+	_finish_race()
+	_set_state("timeup")
+
+
+func _finish_race() -> void:
 	total_dst += race.dist / P.DST_UNIT
 	if int(race.score) > record:
 		record = int(race.score)
 		race.new_record = true
 	_save()
-	_set_state("timeup")
 
 
 # ---------- 保存 (自己ベスト・累計距離) ----------
